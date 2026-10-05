@@ -1,0 +1,5 @@
+Main folder split into:
+  - "input" folder - where all the text files of the song lyrics are imported
+  - "output" folder - the txt files of the romanized lyrics of the songs 
+  - arabic_romanize.py - where the romanizing happens
+
