@@ -29,7 +29,3 @@ if __name__ == "__main__":
     romanizing_Arabic()    
 
 
-
-
-#result = Romanizer("안녕하세요")
-#print(result.romanize())
