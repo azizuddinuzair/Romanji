@@ -1,75 +1,66 @@
-import argparse
-import csv
-import sys
-import unicodedata
+
 from pathlib import Path
+from korean_romanizer import Romanizer
+import re
 
-import pykakasi
+# Get the directory containing this Python file.
+folder = Path(__file__).parent
 
-SYSTEMS = ("hepburn", "kunrei", "passport", "hira", "kana")
-PARTICLES = {"は": "wa", "へ": "e", "を": "o"}
-
-OPENING = "([{"
-
-_kks = pykakasi.kakasi()
-
-
-def romanize(text, system="hepburn", fix_particles=True):
-    """Return `text` converted to the chosen romanization system."""
-    if not text:
-        return text
-    text = unicodedata.normalize("NFKC", text)
-
-    out = ""
-    for token in _kks.convert(text):
-        word = token[system]
-        if fix_particles and system not in ("hira", "kana") and token["orig"] in PARTICLES:
-            word = PARTICLES[token["orig"]]
-        if not word:
-            continue
-        if system in ("hira", "kana"):
-            out += word
-            continue
-        if out and not out[-1].isspace() and out[-1] not in OPENING and (word[0].isalnum() or word[0] in OPENING):
-            out += " "
-        out += word
-    return out
+input_file = folder / "lyrics.txt"
+output_file = folder / "output.txt"
 
 
-def romanize_txt(src, dst, **opts):
-    with open(src, encoding="utf-8-sig") as fin, open(dst, "w", encoding="utf-8", newline="") as fout:
-        for line in fin:
-            body = line.rstrip("\r\n")
-            fout.write(romanize(body, **opts) + line[len(body):])
+def romanize_word(word):
+    """Romanize a Korean word using the Revised Romanization."""
+    return Romanizer(word).romanize()
 
 
-def romanize_csv(src, dst, **opts):
-    with open(src, encoding="utf-8-sig", newline="") as fin, open(dst, "w", encoding="utf-8", newline="") as fout:
-        writer = csv.writer(fout)
-        for row in csv.reader(fin):
-            writer.writerow([romanize(cell, **opts) for cell in row])
+def process_line(line):
+    # Giữ whitespace and punctuation; process only one word at a time
+    tokens = re.findall(r"\s+|[가-힣]+|[^가-힣\s]+", line)
+    result = []
+
+    for token in tokens:
+        if re.fullmatch(r"[가-힣]+", token):
+            romanized = romanize_word(token)
+
+            # Add hyphens between original Hangul syllables.
+            # This classification is approximate and does not guarantee accuracy (I'm still working on)
+            #for every instance of sound change in Korean.
+            syllables = list(token)
+            if len(syllables) == 1:
+                result.append(romanized)
+            else:
+                # Romanize each syllables to create hyphens '-'.
+                parts = [
+                    romanize_word(syllable)
+                    for syllable in syllables
+                ]
+                result.append("-".join(parts))
+        else:
+            result.append(token)
+
+    return "".join(result)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Romanize Japanese text in a .txt or .csv file.")
-    parser.add_argument("input", type=Path, help="input .txt or .csv file (UTF-8)")
-    parser.add_argument("-o", "--output", type=Path, help="output file (default: <input>_romanized.<ext>)")
-    parser.add_argument("-s", "--system", choices=SYSTEMS, default="hepburn", help="romanization system (default: hepburn)")
-    parser.add_argument("--literal-particles", action="store_true", help="keep は/へ/を as ha/he/wo instead of wa/e/o")
-    args = parser.parse_args()
+    if not input_file.exists():
+        print(f"Không tìm thấy file: {input_file}")
+        return
 
-    if not args.input.is_file():
-        sys.exit(f"Input file not found: {args.input}")
+    text = input_file.read_text(encoding="utf-8-sig")
 
-    output = args.output or args.input.with_name(f"{args.input.stem}_romanized{args.input.suffix}")
-    opts = {"system": args.system, "fix_particles": not args.literal_particles}
+    output_lines = [
+        process_line(line)
+        for line in text.splitlines()
+    ]
 
-    if args.input.suffix.lower() == ".csv":
-        romanize_csv(args.input, output, **opts)
-    else:
-        romanize_txt(args.input, output, **opts)
+    output_file.write_text(
+        "\n".join(output_lines),
+        encoding="utf-8"
+    )
 
-    print(f"Romanized {args.input} -> {output}")
+    print(f"Đã xử lý xong: {output_file}")
 
 
 if __name__ == "__main__":
