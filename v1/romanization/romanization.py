@@ -16,7 +16,7 @@ def romanize_word(word):
 
 
 def process_line(line):
-    # Giữ whitespace and punctuation; process only one word at a time
+    # Keep whitespace and punctuation; process only one word at a time
     tokens = re.findall(r"\s+|[가-힣]+|[^가-힣\s]+", line)
     result = []
 
@@ -45,7 +45,7 @@ def process_line(line):
 
 def main():
     if not input_file.exists():
-        print(f"Không tìm thấy file: {input_file}")
+        print(f"Cannot find the file: {input_file}")
         return
 
     text = input_file.read_text(encoding="utf-8-sig")
@@ -60,7 +60,7 @@ def main():
         encoding="utf-8"
     )
 
-    print(f"Đã xử lý xong: {output_file}")
+    print(f"Process complete: {output_file}")
 
 
 if __name__ == "__main__":
