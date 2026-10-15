@@ -2,6 +2,7 @@ from langdetect import detect
 
 
 # Detects if code is Japanese or not
+# Returns True if the file contains Japanese text, False otherwise.
 def is_japanese(file_path):
    try:
        with open(file_path, "r", encoding="utf-8") as file:
