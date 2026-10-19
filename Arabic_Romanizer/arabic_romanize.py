@@ -9,6 +9,10 @@ output_folder_path = project_folder_path / "output"
 def romanizing_Arabic():
     txt_files = list(input_folder_path.glob("*.txt"))       #finds all .txt files in the folder and put their addresses into a list
 
+    if not txt_files:
+        print("No .txt files found in [input] folder.")
+        return
+
     for file_path in txt_files:
         with open(file_path, encoding="utf-8") as file:
             lines = file.read().splitlines()
