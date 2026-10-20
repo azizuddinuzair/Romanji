@@ -1,0 +1,2 @@
+Latest possible version of python for speech-to-text module (whisper)
+3.12.10
