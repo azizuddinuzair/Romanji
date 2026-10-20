@@ -1,7 +1,12 @@
 from langdetect import detect
 
 
+<<<<<<< HEAD
 # Detects if lyrics are Japanese or not
+=======
+# Detects if text is Japanese or not
+# Returns True if the file contains Japanese text, False otherwise.
+>>>>>>> f55ae08d35ff46e0b2053427a1a034e8b475eb0c
 def is_japanese(file_path):
    try:
        with open(file_path, "r", encoding="utf-8") as file:
