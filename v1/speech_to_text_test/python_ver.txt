@@ -1,0 +1,2 @@
+Latest possible version of python for Speech-2-Text module
+3.12.10
