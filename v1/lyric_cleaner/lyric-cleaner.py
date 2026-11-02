@@ -33,6 +33,7 @@ def lyricClean():
         
         with open("song_lyrics.txt", "w",encoding="utf-8") as file_out:
             for line in tokenizedSong:
+                
                 file_out.write(line + '\n')
     
 
