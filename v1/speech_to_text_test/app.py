@@ -1,18 +1,14 @@
-
 # Voice-to-Text with OpenAI Whisper
 # ---------------------------------
 # Record your voice from the microphone (or load an audio file) and get a
-# transcript written in the language you chose: Arabic, Korean, or Japanese.
+# transcript written in the language you chose: Arabic, Korean, Japanese, or Serbian.
 
 # Whisper's task="transcribe" keeps the output in the original language
 # (it does NOT translate to English). The chosen language is passed to
 # Whisper explicitly, so it never guesses a different one.
 
-# dependencies
-# ffmpeg
-
-#Test version 1
-
+import os
+import sys
 import threading
 import time
 import tkinter as tk
@@ -21,25 +17,28 @@ from tkinter import filedialog, messagebox, ttk
 import numpy as np
 import sounddevice as sd
 
+# NOTE: torch and whisper are imported lazily (in a background thread) so the
+# window appears immediately; importing them can take a while on first launch.
+
+# A packaged "windowed" .exe has no console, so stdout/stderr are None and
+# Whisper's download progress bar (tqdm) would crash. Give them a sink.
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
 SAMPLE_RATE = 16000  # Whisper expects 16 kHz mono audio
 MODEL_CHOICES = ["tiny", "base", "small", "medium", "large"]
 
-# Display name to Whisper language code
+# Display name -> Whisper language code
+# Version Changes: added Serbian
 SUPPORTED_LANGUAGES = {
     "Arabic (العربية)": "ar",
     "Korean (한국어)": "ko",
     "Japanese (日本語)": "ja",
+    "Serbian (српски / srpski)": "sr",
 }
 
-#Deadass don't ask me abt this class
-
-#Initially plan was to use a siple TK inter GUI, add mp3 files to project folder
-#and use that to test whisper functionality
-
-#Upgraded program with AI assistance to enable adding mp3 files from user directory
-#and also recording
-
-#Referred to this repo for documentation: https://github.com/openai/whisper
 
 class VoiceToTextApp(tk.Tk):
     def __init__(self):
