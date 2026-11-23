@@ -1,0 +1,6 @@
+python-dotenv
+langdetect
+pykakasi
+korean_romanizer
+arabic2latin
+wcwidth

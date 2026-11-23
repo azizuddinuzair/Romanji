@@ -2,7 +2,7 @@
 
 Romanji takes a song, gets its lyrics, romanizes them, and shows the original and the romanized text side by side.
 
-**Status:** v2 is in the design stage. This README describes the intended behavior; the commands below work once the code lands (see Roadmap).
+**Status:** Milestone 1 is built: `python -m romanji text <file>` works for Japanese, Korean, Arabic and Serbian. Genius lookup and audio mode (Whisper) are designed but not built yet; their commands below won't run until they land (see Roadmap).
 
 ## Supported languages
 | Language | Code | Library (from v1) |
@@ -15,18 +15,18 @@ Romanji takes a song, gets its lyrics, romanizes them, and shows the original an
 Detection works per line, so a Japanese song with English lines is fine: Latin-script lines stay as they are.
 
 ## Prerequisites
-- Windows with PowerShell. Python **3.12** (Whisper's dependencies don't support 3.14 yet; the repo-root `.python-version` says 3.14, v2 uses its own).
+- Windows with PowerShell and [uv](https://docs.astral.sh/uv/) (`py -m pip install --user uv`). uv downloads and manages Python **3.12** for v2, so you don't install Python system-wide. Whisper's dependencies don't support 3.14 yet; the repo-root `.python-version` says 3.14, v2 uses its own.
 - **ffmpeg** on `PATH` (or `FFMPEG_PATH` in `.env`), for audio mode only.
 - A **Genius API token** (https://genius.com/api-clients), for title/artist lookup only.
 
 ## Install
 ```powershell
 cd v2
-winget install Python.Python.3.12       # if `py -3.12 --version` fails
-winget install Gyan.FFmpeg              # audio mode only
-py -3.12 -m venv .venv
+py -m uv --version                      # if this fails: py -m pip install --user uv
+py -m uv venv --python 3.12 --seed      # creates .venv with Python 3.12 (and pip)
 .\.venv\Scripts\Activate.ps1            # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-pip install -r requirements.txt
+pip install -r requirements.txt         # add requirements-dev.txt to run the tests
+winget install Gyan.FFmpeg              # audio mode only
 pip install -r requirements-audio.txt   # audio mode only (downloads torch, large)
 Copy-Item .env.example .env
 ```
@@ -58,7 +58,9 @@ Widths are measured in display columns, so double-width CJK lines line up. Arabi
 - Songs are harder than speech: background music can make Whisper skip or invent lines. Use `WHISPER_MODEL=medium` for better results.
 
 ## Roadmap
-- [ ] Text, Genius and audio pipeline; CLI; `.txt` and `.lrc` output
+- [x] Text pipeline, CLI `text` command, terminal and `.txt` output (Milestone 1)
+- [ ] Genius lookup (`genius` command)
+- [ ] Audio mode with Whisper and `.lrc` output
 - [ ] Optional vocal separation (e.g. Demucs) before Whisper
 - [ ] Right-to-left (bidi) handling for Arabic
 - [ ] `.html` / `.json` output

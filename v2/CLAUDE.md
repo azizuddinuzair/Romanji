@@ -2,7 +2,13 @@
 
 Romanji takes a song (lyrics file, Genius title+artist, or audio file), romanizes the lyrics and prints original and romanized text side by side. Languages: Japanese (ja), Korean (ko), Arabic (ar), Serbian (sr).
 
-**Status:** the layout and contracts below are the design; code is added stage by stage. Check the tree before assuming a file exists.
+**Status:** Milestone 1 (text path: `python -m romanji text <file> [--save]`) is built and tested. Genius mode (`sources/genius.py`) and audio mode (`sources/audio.py`, `--lrc`) are not built yet. Check the tree before assuming a file exists.
+
+Contract notes from Milestone 1:
+- `romanizers.romanize(line, lang)` keeps its signature; per-run settings go through `romanizers.configure(japanese_system)`, which the pipeline calls from `Settings`.
+- `align.line_by_line()` still prints (v1 compatibility, the one documented exception to "no `print()`"); the pipeline uses `align_lines()` + `output.render_rows()`, and only `cli.py` prints.
+- Han-only lines take the file-level language: majority of the script-certain lines, else `langdetect` on the joined text through the table, else `und`.
+- `romanji/__main__.py` and package `__init__.py` files exist for `python -m romanji`.
 
 ## Rules about v1 (a team project — read first)
 - `v1/` is **read-only**. Never edit, move, rename, reformat or delete anything in it, including its broken test paths. Report v1 problems to the user instead of fixing them.
@@ -44,18 +50,18 @@ v2/
 ```
 
 ## Setup and run (Windows + PowerShell)
-Python **3.12** for everything in v2 (Whisper's dependencies — torch, numba — don't support 3.14; `python-ver.txt` says 3.12.10). The repo-root `.python-version` says 3.14; leave it alone, v2 has its own.
+Python **3.12** for everything in v2 (Whisper's dependencies — torch, numba — don't support 3.14; `python-ver.txt` says 3.12.10). The repo-root `.python-version` says 3.14; leave it alone, v2 has its own. The environment is built with **uv**, which downloads a managed 3.12 itself, so don't install Python system-wide.
 ```powershell
 cd v2
-winget install Python.Python.3.12      # if `py -3.12 --version` fails
-winget install Gyan.FFmpeg             # audio mode only; or set FFMPEG_PATH
-py -3.12 -m venv .venv
+py -m uv --version                     # if this fails: py -m pip install --user uv
+py -m uv venv --python 3.12 --seed     # creates v2\.venv (gitignored); --seed adds pip
 .\.venv\Scripts\Activate.ps1           # may need: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-pip install -r requirements.txt        # add -r requirements-audio.txt for audio mode
-Copy-Item .env.example .env            # then fill in GENIUS_ACCESS_TOKEN
-python -m romanji text song.txt
-python -m romanji genius "<song>" "<artist>"
-python -m romanji audio song.mp3 --lrc --save
+pip install -r requirements-dev.txt    # core + pytest. Audio mode: also -r requirements-audio.txt
+Copy-Item .env.example .env            # then fill in GENIUS_ACCESS_TOKEN (Genius mode only)
+python -m romanji text song.txt [--save]
+python -m romanji genius "<song>" "<artist>"     # not built yet
+python -m romanji audio song.mp3 --lrc --save    # not built yet
+winget install Gyan.FFmpeg             # audio mode only; or set FFMPEG_PATH
 ```
 Windows: console output must be UTF-8 (`cli.py` reconfigures stdout; Windows Terminal handles CJK width, legacy conhost may not).
 

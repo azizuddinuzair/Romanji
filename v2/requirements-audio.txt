@@ -1,0 +1,2 @@
+# Audio mode (Milestone 2+). Needs ffmpeg on PATH or FFMPEG_PATH in .env.
+openai-whisper
